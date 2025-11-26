@@ -2,6 +2,10 @@
 
 A clean, easy-to-use terminal-based interface (TUI) for creating and studying Anki-style flashcards.
 
+[![GitHub](https://img.shields.io/badge/github-textuanki-blue?logo=github)](https://github.com/Tilem0/textuanki)
+[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 ## Features
 
 - **Beautiful TUI**: Clean, distraction-free interface built with Textual
@@ -21,12 +25,39 @@ A clean, easy-to-use terminal-based interface (TUI) for creating and studying An
 ### Install
 
 ```bash
-# Clone or navigate to the project directory
+# Clone the repository
+git clone https://github.com/Tilem0/textuanki.git
 cd textuanki
 
-# Install dependencies
-pip install -e .
+# Run the app (auto-creates venv and installs dependencies)
+./run.sh
 ```
+
+Or manually:
+
+Or manually:
+
+```bash
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install textual genanki
+```
+
+## Quick Start
+
+```bash
+# Run the app
+./run.sh
+
+# Or manually
+source venv/bin/activate
+python src/main.py
+```
+
+The app comes with 24 sample flashcards to get you started!
 
 ## Usage
 
@@ -125,12 +156,33 @@ All data is stored locally in a SQLite database at `~/.textuanki/cards.db`. Your
 ### Running Tests
 
 ```bash
-pytest tests/
+source venv/bin/activate
+python test_basic.py
+```
+
+### Adding Sample Data
+
+```bash
+source venv/bin/activate
+python add_sample_data.py
 ```
 
 ### Contributing
 
-Contributions are welcome! Feel free to open issues or submit pull requests.
+Contributions are welcome! Feel free to:
+- Report bugs via [GitHub Issues](https://github.com/Tilem0/textuanki/issues)
+- Submit feature requests
+- Create pull requests
+
+See [agent.md](agent.md) for detailed project documentation.
+
+## Documentation
+
+- **[START_HERE.md](START_HERE.md)** - Welcome guide for new users
+- **[QUICKSTART.md](QUICKSTART.md)** - Quick installation and usage
+- **[FEATURES.md](FEATURES.md)** - Complete feature reference
+- **[DEMO.md](DEMO.md)** - Visual interface tour
+- **[agent.md](agent.md)** - Comprehensive project documentation
 
 ## License
 
