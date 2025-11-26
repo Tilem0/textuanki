@@ -1,0 +1,22 @@
+[project]
+name = "textuanki"
+version = "0.1.0"
+description = "A clean, easy-to-use TUI for creating and studying Anki flashcards"
+requires-python = ">=3.10"
+dependencies = [
+    "textual>=0.47.0",
+    "genanki>=0.13.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+]
+
+[project.scripts]
+textuanki = "src.main:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_backend"
