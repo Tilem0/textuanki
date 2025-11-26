@@ -1,4 +1,4 @@
-"""Browse cards screen for TextuAnki."""
+"""Browse cards screen for TextuAnki - Colorful Design."""
 from textual.app import ComposeResult
 from textual.containers import Container, Vertical
 from textual.screen import Screen
@@ -7,7 +7,6 @@ from textual.binding import Binding
 
 from src.models.card import Card
 from src.models.deck import Deck
-from src.banners import BROWSE_BANNER, to_smallcaps
 
 
 class BrowseScreen(Screen):
@@ -15,55 +14,55 @@ class BrowseScreen(Screen):
     
     CSS = """
     BrowseScreen {
-        background: #000000;
+        background: $background;
     }
     
     #browse-container {
         width: 100%;
         height: 100%;
-        padding: 1 2;
-        background: #000000;
+        padding: 2 4;
+        background: $background;
     }
     
-    #banner {
-        color: #FFFFFF;
+    #title {
         text-align: center;
-        margin-bottom: 1;
-        background: #000000;
+        text-style: bold;
+        color: $primary;
+        margin: 1 0 2 0;
     }
     
     DataTable {
         height: 1fr;
         margin: 1 0;
-        border: heavy #FFFFFF;
-        background: #000000;
-        color: #FFFFFF;
+        border: round $primary;
+        background: $surface;
+        color: $text;
     }
     
     DataTable > .datatable--header {
-        background: #000000;
-        color: #FFFFFF;
+        background: $panel;
+        color: $accent;
         text-style: bold;
     }
     
     DataTable > .datatable--cursor {
-        background: #FFFFFF;
-        color: #000000;
+        background: $primary;
+        color: $background;
     }
     
     DataTable > .datatable--odd-row {
-        background: #000000;
+        background: $surface;
     }
     
     DataTable > .datatable--even-row {
-        background: #000000;
+        background: $panel;
     }
     
     #instructions {
         text-align: center;
-        color: #666666;
+        color: $text-muted;
         margin: 1 0;
-        background: #000000;
+        background: $background;
     }
     """
     
@@ -75,23 +74,17 @@ class BrowseScreen(Screen):
     def compose(self) -> ComposeResult:
         """Create child widgets for browsing."""
         with Container(id="browse-container"):
-            yield Static(BROWSE_BANNER, id="banner")
+            yield Static("🔍 Browse Cards", id="title")
             yield DataTable(id="cards-table")
             yield Static(
-                to_smallcaps("arrow keys to navigate | d to delete | esc to go back"),
+                "Arrow keys to navigate • D to delete • ESC to go back",
                 id="instructions"
             )
     
     def on_mount(self) -> None:
         """Set up the data table when screen mounts."""
         table = self.query_one(DataTable)
-        table.add_columns(
-            to_smallcaps("id"),
-            to_smallcaps("deck"),
-            to_smallcaps("front"),
-            to_smallcaps("back"),
-            to_smallcaps("tags")
-        )
+        table.add_columns("ID", "Deck", "Front", "Back", "Tags")
         table.cursor_type = "row"
         
         # Load all cards

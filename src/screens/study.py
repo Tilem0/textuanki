@@ -1,4 +1,4 @@
-"""Study screen for TextuAnki."""
+"""Study screen for TextuAnki - Colorful Design."""
 from textual.app import ComposeResult
 from textual.containers import Container, Vertical, Horizontal
 from textual.screen import Screen
@@ -7,7 +7,6 @@ from textual.binding import Binding
 
 from src.models.card import Card
 from src.models.review import Review
-from src.banners import STUDY_BANNER, to_smallcaps
 
 
 class StudyScreen(Screen):
@@ -15,86 +14,111 @@ class StudyScreen(Screen):
     
     CSS = """
     StudyScreen {
-        background: #000000;
+        background: $background;
     }
     
     #study-container {
         width: 100%;
         height: 100%;
-        padding: 1 2;
-        background: #000000;
+        padding: 2 4;
+        background: $background;
     }
     
-    #banner {
-        color: #FFFFFF;
+    #title {
         text-align: center;
-        margin-bottom: 1;
-        background: #000000;
+        text-style: bold;
+        color: $primary;
+        margin: 1 0 2 0;
     }
     
     #progress {
         text-align: center;
-        color: #999999;
+        color: $text-muted;
         margin: 1 0;
-        background: #000000;
+        background: $background;
     }
     
     #card-container {
         width: 100%;
         height: auto;
-        border: heavy #FFFFFF;
-        background: #000000;
-        padding: 2 4;
-        margin: 1 0;
+        border: round $primary;
+        background: $surface;
+        padding: 3 4;
+        margin: 2 0;
     }
     
     #card-content {
-        min-height: 12;
+        min-height: 15;
         text-align: center;
         content-align: center middle;
-        color: #FFFFFF;
-        background: #000000;
-    }
-    
-    #divider {
-        color: #FFFFFF;
-        text-align: center;
-        margin: 1 0;
-        background: #000000;
+        color: $text;
+        background: $surface;
     }
     
     #rating-buttons {
         height: auto;
-        margin: 1 0;
+        margin: 2 0;
         align: center middle;
-        background: #000000;
+        background: $background;
     }
     
     .rating-btn {
-        min-width: 15;
+        min-width: 16;
         height: 3;
         margin: 0 1;
-        border: heavy #FFFFFF;
-        background: #000000;
-        color: #FFFFFF;
+        border: round $primary;
+        background: $surface;
+        color: $text;
     }
     
     .rating-btn:hover {
-        background: #FFFFFF;
-        color: #000000;
+        background: $primary;
+        color: $background;
     }
     
     .rating-btn:disabled {
-        border: heavy #333333;
-        color: #333333;
-        background: #000000;
+        border: round $panel;
+        color: $text-muted;
+        background: $panel;
+    }
+    
+    .rating-again {
+        border: round $error;
+    }
+    
+    .rating-again:hover {
+        background: $error;
+    }
+    
+    .rating-hard {
+        border: round $warning;
+    }
+    
+    .rating-hard:hover {
+        background: $warning;
+    }
+    
+    .rating-good {
+        border: round $success;
+    }
+    
+    .rating-good:hover {
+        background: $success;
+    }
+    
+    .rating-easy {
+        border: round $accent;
+    }
+    
+    .rating-easy:hover {
+        background: $accent;
     }
     
     #instructions {
         text-align: center;
-        color: #666666;
+        color: $text-muted;
         margin: 1 0;
-        background: #000000;
+        background: $background;
     }
     """
     
@@ -123,22 +147,20 @@ class StudyScreen(Screen):
     def compose(self) -> ComposeResult:
         """Create child widgets for study mode."""
         with Container(id="study-container"):
-            yield Static(STUDY_BANNER, id="banner")
+            yield Static("📝 Study Session", id="title")
             yield Static("", id="progress")
             
             with Vertical(id="card-container"):
                 yield Static("", id="card-content")
             
-            yield Static("━" * 80, id="divider")
-            
             with Horizontal(id="rating-buttons"):
-                yield Button("✗ AGAIN [1]", classes="rating-btn", id="again-btn")
-                yield Button("△ HARD [2]", classes="rating-btn", id="hard-btn")
-                yield Button("◯ GOOD [3]", classes="rating-btn", id="good-btn")
-                yield Button("◎ EASY [4]", classes="rating-btn", id="easy-btn")
+                yield Button("Again [1]", classes="rating-btn rating-again", id="again-btn")
+                yield Button("Hard [2]", classes="rating-btn rating-hard", id="hard-btn")
+                yield Button("Good [3]", classes="rating-btn rating-good", id="good-btn")
+                yield Button("Easy [4]", classes="rating-btn rating-easy", id="easy-btn")
             
             yield Static(
-                to_smallcaps("press space to reveal | use 1-4 to rate | esc to exit"),
+                "Press SPACE to reveal • 1-4 to rate • ESC to exit",
                 id="instructions"
             )
     
@@ -148,7 +170,7 @@ class StudyScreen(Screen):
         progress_widget = self.query_one("#progress", Static)
         
         if not self.cards:
-            content_widget.update("╔═══════════════════════════════╗\n║  NO CARDS DUE - GREAT WORK!   ║\n╚═══════════════════════════════╝")
+            content_widget.update("🎉 No cards due! Great work!")
             progress_widget.update("")
             self.query_one("#rating-buttons").display = False
             return
@@ -157,21 +179,20 @@ class StudyScreen(Screen):
         card = self.cards[self.current_index]
         
         # Update progress
-        progress_text = to_smallcaps(f"card {self.current_index + 1} of {len(self.cards)}")
-        progress_widget.update(f"【 {progress_text} 】")
+        progress_widget.update(f"Card {self.current_index + 1} of {len(self.cards)}")
         
         # Update content
         if self.show_answer:
             content_widget.update(
-                f"[bold]【 QUESTION 】[/bold]\n\n{card.front}\n\n"
-                f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                f"[bold]【 ANSWER 】[/bold]\n\n{card.back}"
+                f"[bold cyan]Question:[/bold cyan]\n\n{card.front}\n\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"[bold green]Answer:[/bold green]\n\n{card.back}"
             )
             # Show rating buttons
             for btn in self.query(Button):
                 btn.disabled = False
         else:
-            content_widget.update(f"[bold]【 QUESTION 】[/bold]\n\n{card.front}")
+            content_widget.update(f"[bold cyan]Question:[/bold cyan]\n\n{card.front}")
             # Hide rating buttons
             for btn in self.query(Button):
                 btn.disabled = True

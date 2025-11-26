@@ -11,40 +11,39 @@ from src.database.db import get_db
 class TextuAnkiApp(App):
     """A Textual app for managing and studying Anki flashcards."""
     
-    # Brutalist black and white e-ink theme
+    # Modern colorful theme with soft gradients
     CSS = """
     Screen {
-        background: #000000;
+        background: $background;
     }
     
     Header {
-        background: #FFFFFF;
-        color: #000000;
+        background: $primary;
+        color: $text;
         text-style: bold;
     }
     
     Footer {
-        background: #000000;
-        color: #FFFFFF;
-        border-top: heavy #FFFFFF;
+        background: $panel;
+        color: $text;
     }
     
-    /* E-ink aesthetic - high contrast black and white */
-    $background: #000000;
-    $surface: #000000;
-    $panel: #0A0A0A;
-    $primary: #FFFFFF;
-    $secondary: #CCCCCC;
-    $accent: #FFFFFF;
-    $text: #FFFFFF;
-    $text-muted: #999999;
-    $error: #FFFFFF;
-    $warning: #FFFFFF;
-    $success: #FFFFFF;
+    /* Colorful modern palette */
+    $background: #0a0e27;
+    $surface: #1a1f3a;
+    $panel: #252b48;
+    $primary: #5b7cff;
+    $secondary: #7b8cde;
+    $accent: #ff6b9d;
+    $text: #e8eaf6;
+    $text-muted: #8b94c1;
+    $error: #ff5555;
+    $warning: #ffaa55;
+    $success: #50fa7b;
     """
     
-    TITLE = "ＴＥＸＴＵＡＮＫＩ"
-    SUB_TITLE = "記憶システム"
+    TITLE = "TextuAnki"
+    SUB_TITLE = "Smart Flashcards for Your Terminal"
     
     BINDINGS = [
         Binding("ctrl+q", "quit", "Quit", priority=True),
