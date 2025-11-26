@@ -1,88 +1,112 @@
-"""Dashboard screen for TextuAnki."""
+"""Dashboard screen for TextuAnki - Brutalist E-ink Design."""
 from textual.app import ComposeResult
-from textual.containers import Container, Vertical, Horizontal
+from textual.containers import Container, Vertical, Horizontal, VerticalScroll
 from textual.screen import Screen
 from textual.widgets import Static, Button, Label
 from textual.binding import Binding
 
 from src.models.deck import Deck
 from src.models.card import Card
+from src.banners import TEXTUANKI_BANNER, KANJI, smallcaps
 
 
-class StatsCard(Static):
-    """A card displaying a statistic."""
+class StatBlock(Static):
+    """Brutalist statistics block."""
     
     DEFAULT_CSS = """
-    StatsCard {
+    StatBlock {
         width: 1fr;
-        height: 7;
-        border: solid $primary;
-        background: $panel;
+        height: 9;
+        border: heavy #FFFFFF;
+        background: #000000;
         padding: 1 2;
         margin: 0 1;
     }
     
-    StatsCard .stat-value {
+    StatBlock .kanji {
         text-align: center;
         text-style: bold;
-        color: $accent;
+        color: #FFFFFF;
         content-align: center middle;
+        height: 3;
     }
     
-    StatsCard .stat-label {
+    StatBlock .value {
         text-align: center;
-        color: $text-muted;
+        text-style: bold;
+        color: #FFFFFF;
+        content-align: center middle;
+        height: 3;
+    }
+    
+    StatBlock .label {
+        text-align: center;
+        color: #999999;
         content-align: center middle;
     }
     """
     
-    def __init__(self, label: str, value: str, **kwargs):
+    def __init__(self, kanji: str, label: str, value: str, **kwargs):
         super().__init__(**kwargs)
+        self.kanji_char = kanji
         self.label_text = label
         self.value_text = value
     
     def compose(self) -> ComposeResult:
-        yield Label(self.value_text, classes="stat-value")
-        yield Label(self.label_text, classes="stat-label")
+        yield Label(self.kanji_char, classes="kanji")
+        yield Label(self.value_text, classes="value")
+        yield Label(smallcaps(self.label_text), classes="label")
 
 
-class MenuButton(Button):
-    """A styled menu button."""
+class BrutalistButton(Button):
+    """Brutalist menu button."""
     
     DEFAULT_CSS = """
-    MenuButton {
+    BrutalistButton {
         width: 100%;
-        height: 3;
+        height: 5;
         margin: 1 0;
-        border: solid $primary;
+        border: heavy #FFFFFF;
+        background: #000000;
+        color: #FFFFFF;
+        text-style: bold;
     }
     
-    MenuButton:hover {
-        background: $primary;
+    BrutalistButton:hover {
+        background: #FFFFFF;
+        color: #000000;
     }
     
-    MenuButton:focus {
-        background: $accent;
+    BrutalistButton:focus {
+        background: #FFFFFF;
+        color: #000000;
+        border: heavy #FFFFFF;
     }
     """
 
 
 class DashboardScreen(Screen):
-    """Main dashboard screen."""
+    """Main dashboard screen - Brutalist design."""
     
     CSS = """
+    Screen {
+        background: #000000;
+    }
+    
     #dashboard-container {
         width: 100%;
         height: 100%;
-        padding: 2 4;
+        background: #000000;
+        color: #FFFFFF;
     }
     
-    #welcome {
-        text-align: center;
-        text-style: bold;
-        color: $accent;
-        margin: 1 0 2 0;
+    #banner {
         width: 100%;
+        height: auto;
+        text-align: center;
+        color: #FFFFFF;
+        margin: 1 0;
+        text-style: bold;
     }
     
     #stats-container {
@@ -92,30 +116,49 @@ class DashboardScreen(Screen):
     }
     
     #menu-container {
-        width: 60;
+        width: 70;
         height: auto;
-        margin: 1;
+        align: center top;
+        margin: 2 0;
     }
     
     #shortcuts-help {
         text-align: center;
-        color: $text-muted;
+        color: #666666;
         margin: 2 0;
         width: 100%;
+    }
+    
+    #divider {
+        width: 100%;
+        height: 1;
+        text-align: center;
+        color: #FFFFFF;
+        margin: 1 0;
+    }
+    
+    .divider {
+        width: 100%;
+        height: 1;
+        text-align: center;
+        color: #FFFFFF;
+        margin: 1 0;
     }
     """
     
     BINDINGS = [
-        Binding("s", "study", "Study"),
-        Binding("n", "new_card", "New Card"),
-        Binding("b", "browse", "Browse Cards"),
-        Binding("d", "manage_decks", "Manage Decks"),
+        Binding("s", "study", "ｓᴛᴜᴅʏ", show=True),
+        Binding("n", "new_card", "ɴᴇᴡ", show=True),
+        Binding("b", "browse", "ʙʀᴏᴡsᴇ", show=True),
+        Binding("d", "manage_decks", "ᴅᴇᴄᴋs", show=True),
     ]
     
     def compose(self) -> ComposeResult:
         """Create child widgets for the dashboard."""
-        with Container(id="dashboard-container"):
-            yield Static("📚 Welcome to TextuAnki", id="welcome")
+        with VerticalScroll(id="dashboard-container"):
+            yield Static(TEXTUANKI_BANNER, id="banner")
+            
+            yield Static("━" * 70, classes="divider")
             
             # Statistics
             with Horizontal(id="stats-container"):
@@ -125,19 +168,23 @@ class DashboardScreen(Screen):
                 total_cards = sum(deck.get_card_count() for deck in decks)
                 due_cards = len(Card.get_due_cards())
                 
-                yield StatsCard("Cards Due", str(due_cards))
-                yield StatsCard("Total Cards", str(total_cards))
-                yield StatsCard("Total Decks", str(total_decks))
+                yield StatBlock(KANJI["due"], "CARDS DUE", str(due_cards))
+                yield StatBlock(KANJI["total"], "TOTAL CARDS", str(total_cards))
+                yield StatBlock(KANJI["deck"], "DECKS", str(total_decks))
+            
+            yield Static("━" * 70, classes="divider")
             
             # Menu
             with Vertical(id="menu-container"):
-                yield MenuButton("📖 Study Cards", id="study-btn")
-                yield MenuButton("➕ Create New Card", id="new-card-btn")
-                yield MenuButton("🔍 Browse Cards", id="browse-btn")
-                yield MenuButton("📂 Manage Decks", id="decks-btn")
+                yield BrutalistButton(f"┃ {KANJI['study']} ┃ " + smallcaps("STUDY CARDS") + " ┃", id="study-btn")
+                yield BrutalistButton(f"┃ {KANJI['new']} ┃ " + smallcaps("CREATE NEW CARD") + " ┃", id="new-card-btn")
+                yield BrutalistButton(f"┃ {KANJI['card']} ┃ " + smallcaps("BROWSE CARDS") + " ┃", id="browse-btn")
+                yield BrutalistButton(f"┃ {KANJI['deck']} ┃ " + smallcaps("MANAGE DECKS") + " ┃", id="decks-btn")
+            
+            yield Static("━" * 70, classes="divider")
             
             yield Static(
-                "Keyboard shortcuts: [S]tudy | [N]ew Card | [B]rowse | [D]ecks | Ctrl+Q to quit",
+                smallcaps("[S]tudy | [N]ew | [B]rowse | [D]ecks | ^Q quit"),
                 id="shortcuts-help"
             )
     

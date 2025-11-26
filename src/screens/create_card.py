@@ -1,6 +1,6 @@
 """Create card screen for TextuAnki."""
 from textual.app import ComposeResult
-from textual.containers import Container, Vertical
+from textual.containers import Container, Vertical, Horizontal
 from textual.screen import Screen
 from textual.widgets import Static, Input, TextArea, Button, Select, Label
 from textual.binding import Binding
@@ -8,52 +8,115 @@ from typing import cast
 
 from src.models.deck import Deck
 from src.models.card import Card
+from src.banners import CREATE_BANNER, to_smallcaps
 
 
 class CreateCardScreen(Screen):
     """Screen for creating a new flashcard."""
     
     CSS = """
+    CreateCardScreen {
+        background: #000000;
+    }
+    
     #create-card-container {
         width: 100%;
         height: 100%;
-        padding: 2 4;
-        align: center top;
+        padding: 1 2;
+        background: #000000;
     }
     
-    #title {
+    #banner {
+        color: #FFFFFF;
         text-align: center;
-        text-style: bold;
-        color: $accent;
-        margin: 1 0 2 0;
+        margin-bottom: 1;
+        background: #000000;
     }
     
     #form-container {
-        width: 80;
+        width: 100%;
         height: auto;
-        border: solid $primary;
-        padding: 2;
+        border: heavy #FFFFFF;
+        padding: 2 3;
+        background: #000000;
+        margin: 1 0;
     }
     
     Label {
         margin: 1 0 0 0;
+        color: #FFFFFF;
+        background: #000000;
     }
     
-    Input, TextArea, Select {
+    Input {
         margin: 0 0 1 0;
+        border: heavy #FFFFFF;
+        background: #000000;
+        color: #FFFFFF;
+    }
+    
+    Input:focus {
+        border: heavy #FFFFFF;
+        background: #000000;
     }
     
     TextArea {
-        height: 8;
+        height: 6;
+        margin: 0 0 1 0;
+        border: heavy #FFFFFF;
+        background: #000000;
+        color: #FFFFFF;
+    }
+    
+    TextArea:focus {
+        border: heavy #FFFFFF;
+        background: #000000;
+    }
+    
+    Select {
+        margin: 0 0 1 0;
+        border: heavy #FFFFFF;
+        background: #000000;
+        color: #FFFFFF;
+    }
+    
+    Select:focus {
+        border: heavy #FFFFFF;
+    }
+    
+    #divider {
+        color: #FFFFFF;
+        text-align: center;
+        margin: 1 0;
+        background: #000000;
     }
     
     #button-container {
         height: auto;
-        margin: 2 0;
+        margin: 1 0;
+        align: center middle;
+        background: #000000;
     }
     
     Button {
+        min-width: 18;
+        height: 3;
         margin: 0 1;
+        border: heavy #FFFFFF;
+        background: #000000;
+        color: #FFFFFF;
+    }
+    
+    Button:hover {
+        background: #FFFFFF;
+        color: #000000;
+    }
+    
+    #instructions {
+        text-align: center;
+        color: #666666;
+        margin: 1 0;
+        background: #000000;
     }
     """
     
@@ -65,28 +128,35 @@ class CreateCardScreen(Screen):
     def compose(self) -> ComposeResult:
         """Create child widgets for the form."""
         with Container(id="create-card-container"):
-            yield Static("➕ Create New Card", id="title")
+            yield Static(CREATE_BANNER, id="banner")
             
             with Vertical(id="form-container"):
-                yield Label("Deck:")
+                yield Label("【 " + to_smallcaps("deck") + " 】")
                 
                 # Get available decks
                 decks = Deck.get_all()
                 deck_options = [(deck.name, deck.id) for deck in decks]
                 yield Select(deck_options, id="deck-select", prompt="Select a deck")
                 
-                yield Label("Front (Question):")
+                yield Label("【 " + to_smallcaps("front (question)") + " 】")
                 yield TextArea(id="front-input")
                 
-                yield Label("Back (Answer):")
+                yield Label("【 " + to_smallcaps("back (answer)") + " 】")
                 yield TextArea(id="back-input")
                 
-                yield Label("Tags (optional, comma-separated):")
+                yield Label("【 " + to_smallcaps("tags (optional)") + " 】")
                 yield Input(placeholder="e.g., vocabulary, chapter1", id="tags-input")
                 
-                with Container(id="button-container"):
-                    yield Button("Save Card", variant="success", id="save-btn")
-                    yield Button("Cancel", variant="default", id="cancel-btn")
+                yield Static("━" * 80, id="divider")
+                
+                with Horizontal(id="button-container"):
+                    yield Button("✓ SAVE CARD", id="save-btn")
+                    yield Button("✗ CANCEL", id="cancel-btn")
+            
+            yield Static(
+                to_smallcaps("ctrl+s to save | esc to cancel"),
+                id="instructions"
+            )
     
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button presses."""
@@ -128,4 +198,3 @@ class CreateCardScreen(Screen):
     def action_cancel(self) -> None:
         """Cancel and return to previous screen."""
         self.app.pop_screen()
-

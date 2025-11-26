@@ -6,6 +6,7 @@ from textual.widgets import Static, DataTable, Button, Input, Label
 from textual.binding import Binding
 
 from src.models.deck import Deck
+from src.banners import DECK_BANNER, to_smallcaps
 
 
 class CreateDeckModal(ModalScreen):
@@ -14,40 +15,76 @@ class CreateDeckModal(ModalScreen):
     CSS = """
     CreateDeckModal {
         align: center middle;
+        background: #00000099;
     }
     
     #modal-container {
         width: 60;
         height: auto;
-        border: thick $accent;
-        background: $surface;
-        padding: 2;
+        border: heavy #FFFFFF;
+        background: #000000;
+        padding: 2 3;
+    }
+    
+    #modal-title {
+        text-align: center;
+        text-style: bold;
+        color: #FFFFFF;
+        margin: 0 0 1 0;
+        background: #000000;
     }
     
     Label {
         margin: 1 0 0 0;
+        color: #FFFFFF;
+        background: #000000;
     }
     
     Input {
         margin: 0 0 1 0;
+        border: heavy #FFFFFF;
+        background: #000000;
+        color: #FFFFFF;
+    }
+    
+    Input:focus {
+        border: heavy #FFFFFF;
+        background: #000000;
+    }
+    
+    #button-row {
+        align: center middle;
+        height: auto;
+        margin: 1 0 0 0;
+        background: #000000;
     }
     
     Button {
+        min-width: 12;
+        height: 3;
         margin: 0 1;
+        border: heavy #FFFFFF;
+        background: #000000;
+        color: #FFFFFF;
+    }
+    
+    Button:hover {
+        background: #FFFFFF;
+        color: #000000;
     }
     """
     
     def compose(self) -> ComposeResult:
         with Container(id="modal-container"):
-            yield Static("Create New Deck", classes="modal-title")
-            yield Label("Deck Name:")
+            yield Static("【 " + to_smallcaps("create new deck") + " 】", id="modal-title")
+            yield Label(to_smallcaps("deck name:"))
             yield Input(placeholder="e.g., Spanish Vocabulary", id="deck-name")
-            yield Label("Description (optional):")
+            yield Label(to_smallcaps("description (optional):"))
             yield Input(placeholder="Description", id="deck-description")
             
-            with Horizontal():
-                yield Button("Create", variant="success", id="create-btn")
-                yield Button("Cancel", variant="default", id="cancel-btn")
+            with Horizontal(id="button-row"):
+                yield Button("✓ CREATE", id="create-btn")
+                yield Button("✗ CANCEL", id="cancel-btn")
     
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "create-btn":
@@ -75,27 +112,77 @@ class DeckManagerScreen(Screen):
     """Screen for managing decks."""
     
     CSS = """
+    DeckManagerScreen {
+        background: #000000;
+    }
+    
     #deck-manager-container {
         width: 100%;
         height: 100%;
-        padding: 2 4;
+        padding: 1 2;
+        background: #000000;
     }
     
-    #title {
+    #banner {
+        color: #FFFFFF;
         text-align: center;
-        text-style: bold;
-        color: $accent;
-        margin: 1 0 2 0;
+        margin-bottom: 1;
+        background: #000000;
     }
     
     DataTable {
         height: 1fr;
         margin: 1 0;
+        border: heavy #FFFFFF;
+        background: #000000;
+        color: #FFFFFF;
+    }
+    
+    DataTable > .datatable--header {
+        background: #000000;
+        color: #FFFFFF;
+        text-style: bold;
+    }
+    
+    DataTable > .datatable--cursor {
+        background: #FFFFFF;
+        color: #000000;
+    }
+    
+    DataTable > .datatable--odd-row {
+        background: #000000;
+    }
+    
+    DataTable > .datatable--even-row {
+        background: #000000;
     }
     
     #button-container {
         height: auto;
         margin: 1 0;
+        align: center middle;
+        background: #000000;
+    }
+    
+    Button {
+        min-width: 16;
+        height: 3;
+        margin: 0 1;
+        border: heavy #FFFFFF;
+        background: #000000;
+        color: #FFFFFF;
+    }
+    
+    Button:hover {
+        background: #FFFFFF;
+        color: #000000;
+    }
+    
+    #instructions {
+        text-align: center;
+        color: #666666;
+        margin: 1 0;
+        background: #000000;
     }
     """
     
@@ -108,16 +195,16 @@ class DeckManagerScreen(Screen):
     def compose(self) -> ComposeResult:
         """Create child widgets for deck management."""
         with Container(id="deck-manager-container"):
-            yield Static("📂 Manage Decks", id="title")
+            yield Static(DECK_BANNER, id="banner")
             yield DataTable(id="decks-table")
             
             with Horizontal(id="button-container"):
-                yield Button("New Deck [N]", variant="success", id="new-btn")
-                yield Button("Delete [D]", variant="error", id="delete-btn")
+                yield Button("✚ NEW DECK [N]", id="new-btn")
+                yield Button("✗ DELETE [D]", id="delete-btn")
             
             yield Static(
-                "Use arrow keys to navigate | [N]ew Deck | [D]elete | ESC to go back",
-                classes="help-text"
+                to_smallcaps("arrow keys to navigate | n for new deck | d to delete | esc to go back"),
+                id="instructions"
             )
     
     def on_mount(self) -> None:
@@ -128,7 +215,12 @@ class DeckManagerScreen(Screen):
         """Load decks into the table."""
         table = self.query_one(DataTable)
         table.clear(columns=True)
-        table.add_columns("ID", "Name", "Description", "Cards")
+        table.add_columns(
+            to_smallcaps("id"),
+            to_smallcaps("name"),
+            to_smallcaps("description"),
+            to_smallcaps("cards")
+        )
         table.cursor_type = "row"
         
         decks = Deck.get_all()
@@ -152,8 +244,8 @@ class DeckManagerScreen(Screen):
         """Delete the selected deck."""
         table = self.query_one(DataTable)
         
-        if table.cursor_row is not None:
-            row_key = table.coordinate_to_cell_key((table.cursor_row, 0)).row_key
+        if table.cursor_row is not None and table.cursor_row >= 0:
+            row_key = table.coordinate_to_cell_key(table.cursor_coordinate).row_key
             row = table.get_row(row_key)
             deck_id = int(row[0])
             deck_name = row[1]
